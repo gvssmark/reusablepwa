@@ -50,3 +50,6 @@ self.addEventListener("fetch", event => {
   );
 
 });
+
+
+
