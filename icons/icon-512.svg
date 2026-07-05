@@ -1,0 +1,13 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="#2196f3"></rect>
+  
+  <!-- Sheet -->
+  <rect x="140" y="100" width="232" height="312" rx="24" fill="white"></rect>
+  
+  <!-- Rows -->
+  <rect x="170" y="150" width="172" height="18" fill="#2196f3"></rect>
+  <rect x="170" y="200" width="172" height="18" fill="#2196f3"></rect>
+  <rect x="170" y="250" width="172" height="18" fill="#2196f3"></rect>
+  <rect x="170" y="300" width="130" height="18" fill="#2196f3"></rect>
+  <rect x="170" y="350" width="150" height="18" fill="#2196f3"></rect>
+</svg>
