@@ -7,114 +7,46 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2196f3">
 <style>
-body{
-    font-family:Arial;
-    background:#f4f6f8;
-    margin:0;
-    padding:20px;
-}
-
-.container{
-    max-width:1000px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
+body{    font-family:Arial;    background:#f4f6f8;    margin:0;    padding:20px;}
+.container{    max-width:1000px;    margin:auto;    background:white;    padding:20px;    border-radius:10px;    box-shadow:0 2px 10px rgba(0,0,0,0.1);}
 h2{margin-top:0}
-
-.status{
-    padding:10px;
-    margin:10px 0;
-    background:#e3f2fd;
-    border-left:5px solid #2196f3;
-}
-
-button{
-    padding:10px 15px;
-    background:#2196f3;
-    color:white;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-}
-
-button:hover{
-    background:#1976d2;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:15px;
-}
-
-th{
-    background:#2196f3;
-    color:white;
-    padding:8px;
-}
-
-td{
-    border:1px solid #ddd;
-    padding:8px;
-}
-
-tr:nth-child(even){
-    background:#f9f9f9;
-}
+.status{    padding:10px;    margin:10px 0;    background:#e3f2fd;    border-left:5px solid #2196f3;}
+button{    padding:10px 15px;    background:#2196f3;    color:white;    border:none;    border-radius:5px;    cursor:pointer;}
+button:hover{    background:#1976d2;}
+table{    width:100%;    border-collapse:collapse;    margin-top:15px;}
+th{    background:#2196f3;    color:white;    padding:8px;}
+td{    border:1px solid #ddd;    padding:8px;}
+tr:nth-child(even){    background:#f9f9f9;}
 </style>
 </head>
-
 <body>
-
 <div class="container">
-
 <h2>Google Sheet Smart Cache</h2>
-
 <button onclick="checkUpdate()">Refresh</button>
-
 <div class="status" id="status">Loading...</div>
-
 <div id="tableContainer"></div>
-
 </div>
 <button onclick="installApp()">Install App</button>
 <script>
-
 ////////////////////////////////////////////////////
 // CONFIG
 ////////////////////////////////////////////////////
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_bTMbcKgTta1jX9mETWmPEimNrgBtEyhkzCX4VCONZkTIDQgAX1cTtKWs8-n9lSUb/exec";
 const SHEET_ID = "1IuC4hcLCJlKuJE2jFWYCndFUaMDCQF6QfJRTkHuHcu8";
 const SHEET_NAME = "TempleInfo";
-
 ////////////////////////////////////////////////////
-
-function setStatus(msg){
-    document.getElementById("status").innerText = msg;
-}
-
+function setStatus(msg){    document.getElementById("status").innerText = msg;}
 ////////////////////////////////////////////////////
 // Render Table
 ////////////////////////////////////////////////////
 function renderTable(data){
-
     if(!data || data.length === 0){
         document.getElementById("tableContainer").innerHTML = "No Data";
-        return;
-    }
-
+        return;    }
     let html = "<table><tr>";
-
     Object.keys(data[0]).forEach(k=>{
-        html += `<th>${k}</th>`;
-    });
-
+        html += `<th>${k}</th>`;    });
     html += "</tr>";
-
     data.forEach(row=>{
         html += "<tr>";
         Object.values(row).forEach(v=>{
@@ -122,9 +54,7 @@ function renderTable(data){
         });
         html += "</tr>";
     });
-
     html += "</table>";
-
     document.getElementById("tableContainer").innerHTML = html;
 }
 
@@ -132,88 +62,63 @@ function renderTable(data){
 // Fetch Version ONLY
 ////////////////////////////////////////////////////
 async function fetchVersion(){
-
     const url = `${SCRIPT_URL}?sheetid=${SHEET_ID}&sheetname=${SHEET_NAME}&action=version`;
-
     const res = await fetch(url);
     return await res.json();
 }
-
 ////////////////////////////////////////////////////
 // Fetch Full Data
 ////////////////////////////////////////////////////
 async function fetchData(){
-
     const url = `${SCRIPT_URL}?sheetid=${SHEET_ID}&sheetname=${SHEET_NAME}&action=data`;
-
     const res = await fetch(url);
     return await res.json();
 }
-
 ////////////////////////////////////////////////////
 // MAIN LOGIC
 ////////////////////////////////////////////////////
 async function checkUpdate(){
-
     try{
-
         // 1. Load cached data instantly
         const cached = localStorage.getItem("mydata");
-
         if(cached){
             renderTable(JSON.parse(cached));
             setStatus("Showing cached data...");
         }
-
         // 2. Get version from server
         const serverVersion = await fetchVersion();
-
         if(!serverVersion.success){
             setStatus(serverVersion.message);
             return;
         }
-
         const localVersion = localStorage.getItem("mydate");
-
         console.log("Local:", localVersion);
         console.log("Server:", serverVersion.version);
-
         // 3. Compare versions
         if(localVersion !== serverVersion.version){
-
             setStatus("Updating data from server...");
-
             // 4. Fetch full data only when needed
             const result = await fetchData();
-
             if(!result.success){
                 setStatus(result.message);
                 return;
             }
-
             localStorage.setItem("mydata", JSON.stringify(result.data));
             localStorage.setItem("mydate", result.version);
-
             renderTable(result.data);
-
             setStatus("Updated successfully");
-
         } else {
             setStatus("Already up to date");
         }
-
     } catch(err){
         console.error(err);
         setStatus("Error: " + err.message);
     }
 }
-
 ////////////////////////////////////////////////////
 // Auto run
 ////////////////////////////////////////////////////
 window.onload = checkUpdate;
-
-
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
@@ -225,16 +130,12 @@ if ("serviceWorker" in navigator) {
             });
     });
 }
-
 let deferredPrompt;
-
 window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredPrompt = e;
-
     console.log("Install available");
 });
-
 // call this manually if you want a button
 function installApp(){
     if(deferredPrompt){
@@ -246,6 +147,5 @@ function installApp(){
     }
 }
 </script>
-
 </body>
 </html>
